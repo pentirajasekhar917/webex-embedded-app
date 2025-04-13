@@ -30,6 +30,7 @@ function App() {
     return JSON.parse(localStorage.getItem(ROWS_KEY)) || [getEmptyRow()];
   });
   const [user, setUser] = useState();
+  const [frameContext, setFrameContext] = useState();
 
   useEffect(() => {
     const initWebex = async () => {
@@ -37,7 +38,8 @@ function App() {
         setStatus((s) => s + " | Creating instance");
         const app = new Application();
   
-        const frameContext = await app.onReady();
+        const frameContext1 = await app.onReady();
+        setFrameContext(frameContext1);
         setStatus((s) => s + " | onReady done");
   
         const userInfo = await app.user.getUser(); // No need for `app.user.getUser()` — just `app.getUser()`!
@@ -341,6 +343,9 @@ function App() {
         </button>
       </div>
       <p>{error}</p>
+      <p>In iframe: {window.parent !== window ? "✅" : "❌"}</p>
+      <p>Webex SDK Present: {window.webex ? "✅" : "❌"}</p>
+      <p>{frameContext}</p>
 
       <style>{`
         .container {
