@@ -32,47 +32,30 @@ function App() {
 
   useEffect(() => {
     const initWebex = async () => {
-      let app;
-  
       try {
-        // Initialize the Webex SDK Application instance
-        app = new Application();
-  
-        const context = await app.onReady();
-        console.log("✅ Webex context:", context);
-  
-        // Optional: Start listening for events (before setting state or calling getUser)
-        await app.listen();
-  
-        // Get user info if SDK supports it and it's not redacted
-        const isPrivate = await app.isPrivateDataAvailable();
-        let userInfo;
-  
-        if (isPrivate) {
-          userInfo = await app.getUser();
-        } else {
-          userInfo = {
-            displayName: "Anonymous User",
-            email: "unknown@example.com",
-          };
-        }
-  
-        console.log("👤 Webex user info:", userInfo);
+        const app = new Application();
+
+        const frameContext = await app.onReady();
+        console.log("✅ Webex frame context:", frameContext);
+
+        // Only now it's safe to call SDK methods like getUser()
+        const userInfo = await app.getUser();
+        console.log("👤 User info:", userInfo);
+
         setUser(userInfo);
-        setStatus(`✅ Webex Ready ${isPrivate}: ${userInfo.displayName}`);
-      } catch (error) {
-        console.warn("⚠️ Webex SDK failed to initialize:", error);
-  
-        // Fallback for dev/testing outside of Webex
+        setStatus("✅ Webex Ready: " + JSON.stringify(userInfo));
+      } catch (err) {
+        console.warn("⚠️ Could not initialize Webex SDK. Are you running inside Webex?", err);
+        setStatus("🧪 Running outside Webex"+ err);
+
+        // fallback for testing outside Webex
         setUser({
           displayName: "Dev User",
           email: "dev@example.com",
         });
-  
-        setStatus("🧪 Running outside Webex or failed init: " + error?.message ?? error);
       }
     };
-  
+
     initWebex();
   }, []);
 
