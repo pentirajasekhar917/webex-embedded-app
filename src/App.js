@@ -40,7 +40,7 @@ function App() {
         const frameContext = await app.onReady();
         setStatus((s) => s + " | onReady done");
   
-        const userInfo = await app.getUser(); // No need for `app.user.getUser()` — just `app.getUser()`!
+        const userInfo = await app.user.getUser(); // No need for `app.user.getUser()` — just `app.getUser()`!
         setStatus((s) => s + " | getUser done");
   
         console.log("👤 User info:", userInfo);
