@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Application from '@webex/embedded-app-sdk';
+import {Application} from '@webex/embedded-app-sdk';
 
 
 const STORAGE_KEY = "offline-submissions";
@@ -32,27 +32,44 @@ function App() {
 
   useEffect(() => {
     const initWebex = async () => {
+      let app;
+  
       try {
-        const app = new Application(); // create instance
+        // Initialize the Webex SDK Application instance
+        app = new Application();
   
-        await app.init();
-        const frameContext = await app.onReady();
+        const context = await app.onReady();
+        console.log("✅ Webex context:", context);
   
-        console.log("Webex frame context:", frameContext);
+        // Optional: Start listening for events (before setting state or calling getUser)
+        await app.listen();
   
-        const userInfo = await app.getUser();
-        console.log("User info:", userInfo);
+        // Get user info if SDK supports it and it's not redacted
+        const isPrivate = await app.isPrivateDataAvailable();
+        let userInfo;
   
+        if (isPrivate) {
+          userInfo = await app.getUser();
+        } else {
+          userInfo = {
+            displayName: "Anonymous User",
+            email: "unknown@example.com",
+          };
+        }
+  
+        console.log("👤 Webex user info:", userInfo);
         setUser(userInfo);
-        setStatus("✅ Webex Ready: " + JSON.stringify(userInfo));
-      } catch (err) {
-        console.warn("⚠️ Could not initialize Webex SDK. Are you running inside Webex?", err);
-        setStatus("🧪 Running outside Webex: " + err);
+        setStatus(`✅ Webex Ready ${isPrivate}: ${userInfo.displayName}`);
+      } catch (error) {
+        console.warn("⚠️ Webex SDK failed to initialize:", error);
   
+        // Fallback for dev/testing outside of Webex
         setUser({
           displayName: "Dev User",
           email: "dev@example.com",
         });
+  
+        setStatus("🧪 Running outside Webex or failed init: " + error?.message ?? error);
       }
     };
   
