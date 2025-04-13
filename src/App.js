@@ -9,7 +9,7 @@ const dummyOptions = {
   project: ["NC.TS.AS2025", "TATA.CSUP.GEN25"],
   task: ["General", "Non assisted channel", "Upgrade"],
   location: ["India", "US"],
-  region: ["Hyderabad", "Bengaluru"]
+  region: ["Hyderabad", "Bengaluru"],
 };
 
 const getEmptyRow = () => ({
@@ -19,7 +19,7 @@ const getEmptyRow = () => ({
   region: "",
   workItems: ["", "", "", "", "", "", ""],
   workItemText: "",
-  comment: ""
+  comment: "",
 });
 
 function App() {
@@ -28,35 +28,31 @@ function App() {
     return JSON.parse(localStorage.getItem(ROWS_KEY)) || [getEmptyRow()];
   });
   const [user, setUser] = useState();
-  const isWebexEnv = WebexEmbeddedApp?.onReady;
-
   useEffect(() => {
-    if (isWebexEnv) {
-      WebexEmbeddedApp.onReady().then(() => {
+    const initializeWebex = async () => {
+      try {
+        WebexEmbeddedApp.init(); // ✅ Initialize the SDK
+
+        const frameReady = await WebexEmbeddedApp.onReady(); // ✅ Wait for frame to be ready
+        console.log("Webex is ready:", frameReady);
+
+        const userInfo = await WebexEmbeddedApp.getUser(); // ✅ Fetch user info
+        console.log("User info:", userInfo);
+        setUser(userInfo);
         setStatus("✅ Webex Ready");
-  
-        WebexEmbeddedApp.getUser()
-          .then((userInfo) => {
-            setUser(userInfo);
-            console.log("User info:", userInfo);
-          })
-          .catch((err) => {
-            console.error("Failed to get user info", err);
-            setStatus("⚠ Failed to fetch user");
-          });
-  
-        tryToResend();
-      });
-    } else {
-      console.warn("🧪 Running outside Webex – using mock user");
-      setUser({
-        displayName: "Dev User",
-        email: "dev@example.com"
-      });
-      setStatus("🧪 Running outside Webex");
-    }
-  
-    window.addEventListener("online", tryToResend);
+      } catch (err) {
+        console.warn("🧪 Running outside Webex – using mock user");
+        setUser({
+          displayName: "Dev User",
+          email: "dev@example.com",
+        });
+        setStatus("🧪 Running outside Webex");
+      }
+
+      window.addEventListener("online", tryToResend);
+    };
+
+    initializeWebex();
   }, []);
 
   const showAlert = (message, type = "info") => {
@@ -64,9 +60,9 @@ function App() {
       success: "#28a745",
       warning: "#ffc107",
       info: "#17a2b8",
-      danger: "#dc3545"
+      danger: "#dc3545",
     };
-  
+
     const alertBox = document.createElement("div");
     alertBox.textContent = message;
     alertBox.style.position = "fixed";
@@ -79,14 +75,14 @@ function App() {
     alertBox.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
     alertBox.style.zIndex = "9999";
     alertBox.style.fontSize = "14px";
-  
+
     document.body.appendChild(alertBox);
     setTimeout(() => alertBox.remove(), 3500);
   };
-  
+
   const tryToResend = async () => {
     const submissions = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-  
+
     if (navigator.onLine && submissions.length > 0) {
       for (let data of submissions) {
         await sendToBackend(data);
@@ -96,7 +92,7 @@ function App() {
       setStatus("✅ Resent offline data");
     }
   };
-  
+
   const handleSubmit = async () => {
     if (navigator.onLine) {
       for (let row of rows) {
@@ -107,7 +103,10 @@ function App() {
     } else {
       const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
       localStorage.setItem(STORAGE_KEY, JSON.stringify([...existing, ...rows]));
-      showAlert("⚠ You are offline. Data will be saved automatically once you are online.", "warning");
+      showAlert(
+        "⚠ You are offline. Data will be saved automatically once you are online.",
+        "warning"
+      );
       setStatus("📴 Offline — saved for retry");
     }
   };
@@ -126,13 +125,16 @@ function App() {
 
   const sendToBackend = async (data) => {
     try {
-      await fetch("https://dhwanika.app.n8n.cloud/webhook-test/chatgpt-webhook/test", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-      });
+      await fetch(
+        "https://dhwanika.app.n8n.cloud/webhook-test/chatgpt-webhook/test",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
       console.log("Sent to webhook:", data);
     } catch (err) {
       console.error("Error sending:", err);
@@ -177,13 +179,12 @@ function App() {
 
   return (
     <div className="container">
-      <h3>Webex is {isWebexEnv}</h3>
       <h2>Workmate Assistant</h2>
       {user && (
-  <p className="user-info">
-    👋 Hello, <strong>{user.displayName}</strong> ({user.email})
-  </p>
-)}
+        <p className="user-info">
+          👋 Hello, <strong>{user.displayName}</strong> ({user.email})
+        </p>
+      )}
       <p className="status">Status: {status}</p>
 
       <table className="styled-table">
@@ -193,7 +194,7 @@ function App() {
             <th>Task</th>
             <th>Location</th>
             <th>Region</th>
-            {weekDays.map(day => (
+            {weekDays.map((day) => (
               <th key={day}>{day}</th>
             ))}
             <th>Work Item</th>
@@ -205,27 +206,53 @@ function App() {
           {rows.map((row, rowIndex) => (
             <tr key={rowIndex}>
               <td>
-                <select value={row.project} onChange={(e) => updateRow(rowIndex, "project", e.target.value)}>
+                <select
+                  value={row.project}
+                  onChange={(e) =>
+                    updateRow(rowIndex, "project", e.target.value)
+                  }
+                >
                   <option value="">--Select--</option>
-                  {dummyOptions.project.map(p => <option key={p}>{p}</option>)}
+                  {dummyOptions.project.map((p) => (
+                    <option key={p}>{p}</option>
+                  ))}
                 </select>
               </td>
               <td>
-                <select value={row.task} onChange={(e) => updateRow(rowIndex, "task", e.target.value)}>
+                <select
+                  value={row.task}
+                  onChange={(e) => updateRow(rowIndex, "task", e.target.value)}
+                >
                   <option value="">--Select--</option>
-                  {dummyOptions.task.map(t => <option key={t}>{t}</option>)}
+                  {dummyOptions.task.map((t) => (
+                    <option key={t}>{t}</option>
+                  ))}
                 </select>
               </td>
               <td>
-                <select value={row.location} onChange={(e) => updateRow(rowIndex, "location", e.target.value)}>
+                <select
+                  value={row.location}
+                  onChange={(e) =>
+                    updateRow(rowIndex, "location", e.target.value)
+                  }
+                >
                   <option value="">--Select--</option>
-                  {dummyOptions.location.map(l => <option key={l}>{l}</option>)}
+                  {dummyOptions.location.map((l) => (
+                    <option key={l}>{l}</option>
+                  ))}
                 </select>
               </td>
               <td>
-                <select value={row.region} onChange={(e) => updateRow(rowIndex, "region", e.target.value)}>
+                <select
+                  value={row.region}
+                  onChange={(e) =>
+                    updateRow(rowIndex, "region", e.target.value)
+                  }
+                >
                   <option value="">--Select--</option>
-                  {dummyOptions.region.map(r => <option key={r}>{r}</option>)}
+                  {dummyOptions.region.map((r) => (
+                    <option key={r}>{r}</option>
+                  ))}
                 </select>
               </td>
               {weekDays.map((_, i) => (
@@ -233,7 +260,9 @@ function App() {
                   <input
                     type="text"
                     value={row.workItems[i]}
-                    onChange={(e) => updateRow(rowIndex, "workItems", e.target.value, i)}
+                    onChange={(e) =>
+                      updateRow(rowIndex, "workItems", e.target.value, i)
+                    }
                   />
                 </td>
               ))}
@@ -241,18 +270,27 @@ function App() {
                 <input
                   type="text"
                   value={row.workItemText}
-                  onChange={(e) => updateRow(rowIndex, "workItemText", e.target.value)}
+                  onChange={(e) =>
+                    updateRow(rowIndex, "workItemText", e.target.value)
+                  }
                 />
               </td>
               <td>
                 <input
                   type="text"
                   value={row.comment}
-                  onChange={(e) => updateRow(rowIndex, "comment", e.target.value)}
+                  onChange={(e) =>
+                    updateRow(rowIndex, "comment", e.target.value)
+                  }
                 />
               </td>
               <td>
-                <button className="btn danger" onClick={() => deleteRow(rowIndex)}>🗑️</button>
+                <button
+                  className="btn danger"
+                  onClick={() => deleteRow(rowIndex)}
+                >
+                  🗑️
+                </button>
               </td>
             </tr>
           ))}
@@ -260,8 +298,12 @@ function App() {
       </table>
 
       <div className="button-group">
-        <button className="btn secondary" onClick={addRow}>➕ Add Row</button>
-        <button className="btn primary" onClick={handleSubmit}>✅ Submit</button>
+        <button className="btn secondary" onClick={addRow}>
+          ➕ Add Row
+        </button>
+        <button className="btn primary" onClick={handleSubmit}>
+          ✅ Submit
+        </button>
       </div>
 
       <style>{`
@@ -412,8 +454,7 @@ h2 {
     gap: 0.5rem;
   }
 }
-
-      `}</style>
+`}</style>
     </div>
   );
 }
