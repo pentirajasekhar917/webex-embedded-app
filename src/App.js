@@ -34,23 +34,24 @@ function App() {
   useEffect(() => {
     const initWebex = async () => {
       try {
+        setStatus((s) => s + " | Creating instance");
         const app = new Application();
-        setStatus(status+ "  Instace created");
-        app.onReady();
-        setStatus(status+ "  Executed onready");
-        // Only now it's safe to call SDK methods like getUser()
-        const userInfo = await app.user?.getUser();
-        setStatus(status+ "  Executed getUser function");
+  
+        const frameContext = await app.onReady();
+        setStatus((s) => s + " | onReady done");
+  
+        const userInfo = await app.getUser(); // No need for `app.user.getUser()` — just `app.getUser()`!
+        setStatus((s) => s + " | getUser done");
+  
         console.log("👤 User info:", userInfo);
-
+  
         setUser(userInfo);
-        setStatus(status+ "  Setting UserInfo into state");
-        setStatus("✅ Webex Ready: displayName: "+ userInfo?.displayName+ "  userInfo  " + JSON.stringify(userInfo));
+        setStatus((s) => s + " |✅ Webex Ready: " + userInfo.displayName);
       } catch (err) {
-        setError(err);
         console.warn("⚠️ Could not initialize Webex SDK. Are you running inside Webex?", err);
-        setStatus(status + "🧪 Running outside Webex"+ err);
-
+        setError(err?.message || String(err));
+        setStatus((s) => s + " | 🧪 Running outside Webex: " + (err?.message || err));
+  
         // fallback for testing outside Webex
         setUser({
           displayName: "Dev User",
@@ -58,7 +59,7 @@ function App() {
         });
       }
     };
-
+  
     initWebex();
   }, []);
 
