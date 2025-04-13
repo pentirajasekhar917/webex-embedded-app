@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import WebexEmbeddedApp from '@webex/embedded-app-sdk';
+import { WebexEmbeddedApp } from '@webex/embedded-app-sdk';
+
 
 const STORAGE_KEY = "offline-submissions";
 const ROWS_KEY = "project-rows";
@@ -32,16 +33,16 @@ function App() {
   useEffect(() => {
     const initializeWebex = async () => {
       try {
-        await WebexEmbeddedApp.init(); // ✅ Initialize the SDK
-        await WebexEmbeddedApp.onReady(); // ✅ Wait for it to be ready
+        await WebexEmbeddedApp?.init(); // ✅ Initialize the SDK
+        await WebexEmbeddedApp?.onReady(); // ✅ Wait until it's ready
   
-        const userInfo = await WebexEmbeddedApp.getUser(); // ✅ Get the user info
+        const userInfo = await WebexEmbeddedApp.getUser(); // ✅ Get user
         setUser(userInfo);
         setStatus("✅ Webex Ready");
         console.log("User info:", userInfo);
       } catch (err) {
         console.warn("⚠️ Webex SDK init failed or running outside Webex", err);
-        setStatus("❌ Failed to initialize Webex");
+        setStatus("❌ Failed to initialize Webex"+ err);
       }
     };
   
