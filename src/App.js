@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { WebexEmbeddedApp } from "@webex/embedded-app-sdk";
+import webex, { WebexEmbeddedApp } from "@webex/embedded-app-sdk";
 
 const STORAGE_KEY = "offline-submissions";
 const ROWS_KEY = "project-rows";
@@ -28,6 +28,25 @@ function App() {
     return JSON.parse(localStorage.getItem(ROWS_KEY)) || [getEmptyRow()];
   });
   const [user, setUser] = useState();
+  const [webexStatus, setWebexStatus] = useState('');
+  useEffect(() => {
+    webex
+    .ready()
+    .then(() => {
+      setWebexStatus("Webex Ready");
+      console.log("✅ Webex Ready");
+      return webex.getUserInfo();
+    })
+    .then((userInfo) => {
+      setUser(userInfo);
+      console.log("ℹ️ User Info:", userInfo);
+      // Use userInfo.displayName, .email, etc.
+    })
+    .catch((err) => {
+      setWebexStatus("Webex not ready");
+      console.error("❌ Webex SDK Error:", err);
+    });
+  }, [])
   useEffect(() => {
     const initializeWebex = async () => {
       try {
@@ -186,6 +205,7 @@ function App() {
         </p>
       )}
       <p className="status">Status: {status}</p>
+      <p >Webex status : {webexStatus}</p>
 
       <table className="styled-table">
         <thead>
