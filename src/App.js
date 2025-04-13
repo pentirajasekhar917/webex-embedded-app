@@ -35,20 +35,22 @@ function App() {
     const initWebex = async () => {
       try {
         const app = new Application();
-
+        setStatus(status+ "  Instace created");
         const frameContext = await app.onReady();
         console.log("✅ Webex frame context:", frameContext);
-
+        setStatus(status+ "  Executed onready");
         // Only now it's safe to call SDK methods like getUser()
         const userInfo = await app.user?.getUser();
+        setStatus(status+ "  Executed getUser function");
         console.log("👤 User info:", userInfo);
 
         setUser(userInfo);
+        setStatus(status+ "  Setting UserInfo into state");
         setStatus("✅ Webex Ready: displayName: "+ userInfo?.displayName+ "  userInfo  " + JSON.stringify(userInfo));
       } catch (err) {
         setError(err);
         console.warn("⚠️ Could not initialize Webex SDK. Are you running inside Webex?", err);
-        setStatus("🧪 Running outside Webex"+ err?.message ?? err);
+        setStatus(status + "🧪 Running outside Webex"+ err);
 
         // fallback for testing outside Webex
         setUser({
