@@ -31,22 +31,30 @@ function App() {
   const [user, setUser] = useState();
 
   useEffect(() => {
-    const initializeWebex = async () => {
+    const initWebex = async () => {
       try {
-        await WebexEmbeddedApp?.init(); // ✅ Initialize the SDK
-        await WebexEmbeddedApp?.onReady(); // ✅ Wait until it's ready
+        await WebexEmbeddedApp.init();
+        const frameContext = await WebexEmbeddedApp.onReady(); // <--- this is important
   
-        const userInfo = await WebexEmbeddedApp.getUser(); // ✅ Get user
-        setUser(userInfo);
-        setStatus("✅ Webex Ready");
+        console.log("Webex frame context:", frameContext);
+  
+        const userInfo = await WebexEmbeddedApp.getUser();
         console.log("User info:", userInfo);
+        setUser(userInfo);
+        setStatus("✅ Webex Ready : "+userInfo+ "  : userInfo :"+ JSON.stringify(userInfo));
       } catch (err) {
-        console.warn("⚠️ Webex SDK init failed or running outside Webex", err);
-        setStatus("❌ Failed to initialize Webex"+ err);
+        console.warn("⚠️ Could not initialize Webex SDK. Are you running inside Webex?", err);
+        setStatus("🧪 Running outside Webex :"+err);
+  
+        // Fallback: Dev mode
+        setUser({
+          displayName: "Dev User",
+          email: "dev@example.com",
+        });
       }
     };
   
-    initializeWebex();
+    initWebex();
   }, []);
 
   // useEffect(() => {
