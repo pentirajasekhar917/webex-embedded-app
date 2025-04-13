@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import webex, { WebexEmbeddedApp } from "@webex/embedded-app-sdk";
+import {WebexEmbeddedAppSDK} from '@webex/embedded-app-sdk';
 
 const STORAGE_KEY = "offline-submissions";
 const ROWS_KEY = "project-rows";
@@ -28,51 +28,51 @@ function App() {
     return JSON.parse(localStorage.getItem(ROWS_KEY)) || [getEmptyRow()];
   });
   const [user, setUser] = useState();
-  const [webexStatus, setWebexStatus] = useState('');
-  useEffect(() => {
-    webex
-    .ready()
-    .then(() => {
-      setWebexStatus("Webex Ready");
-      console.log("✅ Webex Ready");
-      return webex.getUserInfo();
-    })
-    .then((userInfo) => {
-      setUser(userInfo);
-      console.log("ℹ️ User Info:", userInfo);
-      // Use userInfo.displayName, .email, etc.
-    })
-    .catch((err) => {
-      setWebexStatus("Webex not ready");
-      console.error("❌ Webex SDK Error:", err);
-    });
-  }, [])
+
   useEffect(() => {
     const initializeWebex = async () => {
+      const sdk = new WebexEmbeddedAppSDK();
+       // Assuming it has a different setup method
+       await sdk.initialize();
+      setStatus("Webex is ready to use")
       try {
-        WebexEmbeddedApp.init(); // ✅ Initialize the SDK
-
-        const frameReady = await WebexEmbeddedApp.onReady(); // ✅ Wait for frame to be ready
-        console.log("Webex is ready:", frameReady);
-
-        const userInfo = await WebexEmbeddedApp.getUser(); // ✅ Fetch user info
-        console.log("User info:", userInfo);
+        const userInfo = await sdk.user.get();
         setUser(userInfo);
-        setStatus("✅ Webex Ready");
-      } catch (err) {
-        console.warn("🧪 Running outside Webex – using mock user");
-        setUser({
-          displayName: "Dev User",
-          email: "dev@example.com",
-        });
-        setStatus("🧪 Running outside Webex");
+        console.log(userInfo);
+      } catch (error) {
+        setStatus("Webex not ready");
+        console.error('Error getting user info:', error);
       }
-
-      window.addEventListener("online", tryToResend);
     };
-
     initializeWebex();
-  }, []);
+  }, [])
+
+  // useEffect(() => {
+  //   const initializeWebex = async () => {
+  //     try {
+  //       WebexEmbeddedApp.init(); // ✅ Initialize the SDK
+
+  //       const frameReady = await WebexEmbeddedApp.onReady(); // ✅ Wait for frame to be ready
+  //       console.log("Webex is ready:", frameReady);
+
+  //       const userInfo = await WebexEmbeddedApp.getUser(); // ✅ Fetch user info
+  //       console.log("User info:", userInfo);
+  //       setUser(userInfo);
+  //       setStatus("✅ Webex Ready");
+  //     } catch (err) {
+  //       console.warn("🧪 Running outside Webex – using mock user");
+  //       setUser({
+  //         displayName: "Dev User",
+  //         email: "dev@example.com",
+  //       });
+  //       setStatus("🧪 Running outside Webex");
+  //     }
+
+  //     window.addEventListener("online", tryToResend);
+  //   };
+
+  //   initializeWebex();
+  // }, []);
 
   const showAlert = (message, type = "info") => {
     const colors = {
@@ -205,7 +205,6 @@ function App() {
         </p>
       )}
       <p className="status">Status: {status}</p>
-      <p >Webex status : {webexStatus}</p>
 
       <table className="styled-table">
         <thead>
