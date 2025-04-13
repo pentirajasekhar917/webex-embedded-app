@@ -25,6 +25,7 @@ const getEmptyRow = () => ({
 
 function App() {
   const [status, setStatus] = useState("Initializing...");
+  const [error, setError] = useState("");
   const [rows, setRows] = useState(() => {
     return JSON.parse(localStorage.getItem(ROWS_KEY)) || [getEmptyRow()];
   });
@@ -45,8 +46,9 @@ function App() {
         setUser(userInfo);
         setStatus("✅ Webex Ready: displayName: "+ userInfo?.displayName+ "  userInfo  " + JSON.stringify(userInfo));
       } catch (err) {
+        setError(err);
         console.warn("⚠️ Could not initialize Webex SDK. Are you running inside Webex?", err);
-        setStatus("🧪 Running outside Webex"+ err);
+        setStatus("🧪 Running outside Webex"+ err?.message ?? err);
 
         // fallback for testing outside Webex
         setUser({
@@ -336,6 +338,7 @@ function App() {
           ✅ Submit
         </button>
       </div>
+      <p>{error}</p>
 
       <style>{`
         .container {
