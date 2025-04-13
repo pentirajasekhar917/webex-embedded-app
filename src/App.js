@@ -36,8 +36,7 @@ function App() {
       try {
         const app = new Application();
         setStatus(status+ "  Instace created");
-        const frameContext = await app.onReady();
-        console.log("✅ Webex frame context:", frameContext);
+        app.onReady();
         setStatus(status+ "  Executed onready");
         // Only now it's safe to call SDK methods like getUser()
         const userInfo = await app.user?.getUser();
