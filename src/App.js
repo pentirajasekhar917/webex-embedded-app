@@ -39,11 +39,11 @@ function App() {
         console.log("✅ Webex frame context:", frameContext);
 
         // Only now it's safe to call SDK methods like getUser()
-        const userInfo = await app.getUser();
+        const userInfo = await app.user?.getUser();
         console.log("👤 User info:", userInfo);
 
         setUser(userInfo);
-        setStatus("✅ Webex Ready: " + JSON.stringify(userInfo));
+        setStatus("✅ Webex Ready: displayName: "+ userInfo?.displayName+ "  userInfo  " + JSON.stringify(userInfo));
       } catch (err) {
         console.warn("⚠️ Could not initialize Webex SDK. Are you running inside Webex?", err);
         setStatus("🧪 Running outside Webex"+ err);
