@@ -29,6 +29,21 @@
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
+    <script>
+      setTimeout(() => {
+        console.log("webex:", window.webex);
+        if (window.webex?.Application) {
+          const app = new window.webex.Application();
+          app.ready().then(() => {
+            app.getUserInfo().then((user) => {
+              document.body.innerHTML = `<h1>Hello ${user.displayName}</h1>`;
+            });
+          });
+        } else {
+          document.body.innerHTML = "<h1>Webex SDK not found!</h1>";
+        }
+      }, 500);
+    </script>
     <div id="root"></div>
     <!--
       This HTML file is a template.
