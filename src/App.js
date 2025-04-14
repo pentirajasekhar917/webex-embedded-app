@@ -34,68 +34,43 @@ function App() {
   useEffect(() => {
     const initWebex = async () => {
       try {
-        setStatus((s) => s + " | Creating instance");
+        //setStatus((s) => s + " | Creating instance");
         const app = new Application();
+        setStatus(" |✅ Webex Ready: ");
 
         const frameContext1 = await app.onReady();
         setFrameContext(frameContext1);
-        setStatus((s) => s + " | onReady done");
+        //setStatus((s) => s + " | onReady done");
 
-        const userInfo = await app.user.getUser(); // No need for `app.user.getUser()` — just `app.getUser()`!
-        setStatus((s) => s + " | getUser done");
+        const userInfo = await app.user?.getUser(); // No need for `app.user.getUser()` — just `app.getUser()`!
+        //setStatus((s) => s + " | getUser done");
 
         console.log("👤 User info:", userInfo);
 
         setUser(userInfo);
-        setStatus((s) => s + " |✅ Webex Ready: " + userInfo.displayName);
       } catch (err) {
+        setStatus(" |✅ Webex Ready: ");
         console.warn(
           "⚠️ Could not initialize Webex SDK. Are you running inside Webex?",
           err
         );
         setError(err?.message || String(err));
-        setStatus(
-          (s) => s + " | 🧪 Running outside Webex: " + (err?.message || err)
-        );
+        // setStatus(
+        //   (s) => s + " | 🧪 Running outside Webex: " + (err?.message || err)
+        // );
 
         // fallback for testing outside Webex
         setUser({
           displayName: "Dev User",
           email: "dev@example.com",
         });
+        
       }
     };
 
     initWebex();
     window.addEventListener("online", tryToResend);
   }, []);
-
-  // useEffect(() => {
-  //   const initializeWebex = async () => {
-  //     try {
-  //       WebexEmbeddedApp.init(); // ✅ Initialize the SDK
-
-  //       const frameReady = await WebexEmbeddedApp.onReady(); // ✅ Wait for frame to be ready
-  //       console.log("Webex is ready:", frameReady);
-
-  //       const userInfo = await WebexEmbeddedApp.getUser(); // ✅ Fetch user info
-  //       console.log("User info:", userInfo);
-  //       setUser(userInfo);
-  //       setStatus("✅ Webex Ready");
-  //     } catch (err) {
-  //       console.warn("🧪 Running outside Webex – using mock user");
-  //       setUser({
-  //         displayName: "Dev User",
-  //         email: "dev@example.com",
-  //       });
-  //       setStatus("🧪 Running outside Webex");
-  //     }
-
-  //     window.addEventListener("online", tryToResend);
-  //   };
-
-  //   initializeWebex();
-  // }, []);
 
   const showAlert = (message, type = "info") => {
     const colors = {
@@ -119,7 +94,7 @@ function App() {
     alertBox.style.fontSize = "14px";
 
     document.body.appendChild(alertBox);
-    setTimeout(() => alertBox.remove(), 3500);
+    setTimeout(() => alertBox.remove(), 5000);
   };
 
   const tryToResend = async () => {
@@ -127,6 +102,7 @@ function App() {
 
     if (navigator.onLine && submissions.length > 0) {
       for (let data of submissions) {
+        console.log(' data ------:', data);
         await sendToBackend(data);
       }
       localStorage.removeItem(STORAGE_KEY);
@@ -222,14 +198,14 @@ function App() {
           <tr>
             <th>Project</th>
             <th>Task</th>
-            <th>Location</th>
+            {/* <th>Location</th>
             <th>Region</th>
             {weekDays.map((day) => (
               <th key={day}>{day}</th>
             ))}
             <th>Work Item</th>
             <th>Comments</th>
-            <th>Delete</th>
+            <th>Delete</th> */}
           </tr>
         </thead>
         <tbody>
@@ -259,7 +235,7 @@ function App() {
                   ))}
                 </select>
               </td>
-              <td>
+              {/* <td>
                 <select
                   value={row.location}
                   onChange={(e) =>
@@ -313,7 +289,7 @@ function App() {
                     updateRow(rowIndex, "comment", e.target.value)
                   }
                 />
-              </td>
+              </td> */}
               <td>
                 <button
                   className="btn danger"
@@ -354,7 +330,7 @@ h2 {
 }
 
 .styled-table {
-  width: 100%;
+  width: 150px;
   border-collapse: collapse;
   background: white;
   border-radius: 12px;
@@ -384,7 +360,7 @@ h2 {
 .styled-table th:nth-child(3),
 .styled-table td:nth-child(4),
 .styled-table th:nth-child(4) {
-  width: 100px;
+  width: 150px;
 }
 
 /* Narrower columns for SU to SA (5–11) */
@@ -396,13 +372,15 @@ h2 {
 /* Inputs and selects inside cells */
 .styled-table td select,
 .styled-table td input {
-  width: 100%;
+  /*width: 100%;*/
+  width: 100px;
+
   padding: 6px 8px;
   box-sizing: border-box;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 13px;
-  max-width: 100%;
+  /*max-width: 100%;*/
 }
 
 .styled-table td select {
