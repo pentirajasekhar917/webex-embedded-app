@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
-import {Application} from '@webex/embedded-app-sdk';
-
+import React, { useEffect, useMemo, useState } from "react";
+import { Application } from "@webex/embedded-app-sdk";
 
 const STORAGE_KEY = "offline-submissions";
 const ROWS_KEY = "project-rows";
@@ -37,23 +36,28 @@ function App() {
       try {
         setStatus((s) => s + " | Creating instance");
         const app = new Application();
-  
+
         const frameContext1 = await app.onReady();
         setFrameContext(frameContext1);
         setStatus((s) => s + " | onReady done");
-  
+
         const userInfo = await app.user.getUser(); // No need for `app.user.getUser()` — just `app.getUser()`!
         setStatus((s) => s + " | getUser done");
-  
+
         console.log("👤 User info:", userInfo);
-  
+
         setUser(userInfo);
         setStatus((s) => s + " |✅ Webex Ready: " + userInfo.displayName);
       } catch (err) {
-        console.warn("⚠️ Could not initialize Webex SDK. Are you running inside Webex?", err);
+        console.warn(
+          "⚠️ Could not initialize Webex SDK. Are you running inside Webex?",
+          err
+        );
         setError(err?.message || String(err));
-        setStatus((s) => s + " | 🧪 Running outside Webex: " + (err?.message || err));
-  
+        setStatus(
+          (s) => s + " | 🧪 Running outside Webex: " + (err?.message || err)
+        );
+
         // fallback for testing outside Webex
         setUser({
           displayName: "Dev User",
@@ -61,8 +65,9 @@ function App() {
         });
       }
     };
-  
+
     initWebex();
+    window.addEventListener("online", tryToResend);
   }, []);
 
   // useEffect(() => {
@@ -148,18 +153,6 @@ function App() {
     }
   };
 
-  // const tryToResend = async () => {
-  //   const submissions = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-
-  //   if (navigator.onLine && submissions.length > 0) {
-  //     for (let data of submissions) {
-  //       await sendToBackend(data);
-  //     }
-  //     localStorage.removeItem(STORAGE_KEY);
-  //     setStatus("✅ Resent offline data");
-  //   }
-  // };
-
   const sendToBackend = async (data) => {
     try {
       await fetch(
@@ -201,28 +194,28 @@ function App() {
     localStorage.setItem(ROWS_KEY, JSON.stringify(updated));
   };
 
-  // const handleSubmit = async () => {
-  //   if (navigator.onLine) {
-  //     for (let row of rows) {
-  //       await sendToBackend(row);
-  //     }
-  //     setStatus("✅ Submitted online");
-  //   } else {
-  //     const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-  //     localStorage.setItem(STORAGE_KEY, JSON.stringify([...existing, ...rows]));
-  //     setStatus("📴 Offline — saved for retry");
-  //   }
-  // };
+  const getRecords = () => {
+    const submissions = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    let result = [];
+    for (let data of submissions) {
+      result.push(data?.project);
+    }
+  };
 
   return (
     <div className="container">
       <h2>Workmate Assistant</h2>
       {user && (
         <p className="user-info">
-          👋 Hello, <strong>{user.displayName}</strong> ({user.email})
+          👋 Hello, <strong>{user.displayName}</strong>
         </p>
       )}
       <p className="status">Status: {status}</p>
+
+      <p>
+        The records that are saved in localStorage:
+        {getRecords()}
+      </p>
 
       <table className="styled-table">
         <thead>
@@ -342,10 +335,6 @@ function App() {
           ✅ Submit
         </button>
       </div>
-      <p>{error}</p>
-      <p>In iframe: {window.parent !== window ? "✅" : "❌"}</p>
-      <p>Webex SDK Present: {window.webex ? "✅" : "❌"}</p>
-      <p>{frameContext}</p>
 
       <style>{`
         .container {
