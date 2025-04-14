@@ -5,13 +5,21 @@ const App = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
+  const [status, setStatus] = useState('');
 
   useEffect(() => {
     const init = async () => {
-      const app = new window.webex.Application();
-      await app?.ready();
-      const user = await app?.getUserInfo();
-      setUserInfo(user);
+      try{
+        const app = new window.webex.Application();
+        setStatus(" instance created ");
+        await app.ready();
+        setStatus(" app ready created ")
+        const user = await app.getUserInfo();
+        setUserInfo(user);
+      }catch(err) {
+        setStatus(err.toString())
+      }
+      
     };
     init();
   }, []);
@@ -51,7 +59,7 @@ const App = () => {
       {userInfo && (
         <div className="text-sm mb-4">Logged in as: {userInfo.displayName}</div>
       )}
-
+    <p>Status: {status}</p>
       <div className="flex-1 overflow-y-auto space-y-2 p-2 bg-white rounded-xl shadow">
         {messages.map((msg, idx) => (
           <div
