@@ -202,7 +202,7 @@ function App() {
       <button onClick={() => {
         setShareUrlTest(' Onclick before setting share url')
         if (webexApp) {
-          setShareUrlTest(' setting share url :', window.location.href);
+          setShareUrlTest(' setting share url :'+ window.location.href);
           webexApp.setShareUrl(window.location.href);
         }
         
