@@ -29,7 +29,9 @@ function App() {
     return JSON.parse(localStorage.getItem(ROWS_KEY)) || [getEmptyRow()];
   });
   const [user, setUser] = useState();
-  const [frameContext, setFrameContext] = useState();
+  const [webexApp, setWebexApp] = useState();
+  const [shareUrlTest, setShareUrlTest] = useState('Testing ')
+
 
   useEffect(() => {
     const initWebex = async () => {
@@ -38,16 +40,24 @@ function App() {
         const app = new Application();
         setStatus(" |✅ Webex Ready: ");
 
-      tryToResend();
+        app.onReady().then(() => {
+          setShareUrlTest('OnReady')
+          setWebexApp(app);
+          console.log("Webex App Ready", webexApp);
+        }).catch(error => {
+          console.error("Error initializing Webex App", error);
+        });
+
+        tryToResend();
 
 
-        const frameContext1 = await app.onReady();
-        setFrameContext(frameContext1);
-        // 👇 Set Share URL if running in a space (not meeting)
-        if (frameContext1.type === "space") {
-          await app.setShareUrl(window.location.href);
-          console.log("✅ Share URL set for space tab");
-        }
+        // const frameContext1 = await app.onReady();
+        // setFrameContext(frameContext1);
+        // // 👇 Set Share URL if running in a space (not meeting)
+        // if (frameContext1.type === "space") {
+        //   await app.setShareUrl(window.location.href);
+        //   console.log("✅ Share URL set for space tab");
+        // }
         //setStatus((s) => s + " | onReady done");
 
         const userInfo = await app.user?.getUser(); // No need for `app.user.getUser()` — just `app.getUser()`!
@@ -188,8 +198,16 @@ function App() {
 
   return (
     <div className="container">
+      <h1>shareUrlTest : {shareUrlTest}</h1>
+      <button onClick={() => {
+        setShareUrlTest(' Onclick before setting share url')
+        if (webexApp) {
+          setShareUrlTest(' setting share url');
+          webexApp.setShareUrl(window.location.href);
+        }
+        
+      }}>Add to a tab</button>
       <h2>Workmate Assistant</h2>
-      <h3>Frame context : {frameContext?.type}</h3>
       {user && (
         <p className="user-info">
           👋 Hello, <strong>{user.displayName}</strong>
