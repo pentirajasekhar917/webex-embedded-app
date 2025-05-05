@@ -18,6 +18,12 @@
       "sizes": "512x512"
     }
   ],
+  "spaceTabs": [
+    {
+      "label": "mywebex-embedded-app",
+      "url": "https://webex-embedded-app.vercel.app/"
+    }
+  ],
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",

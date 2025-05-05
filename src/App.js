@@ -43,6 +43,11 @@ function App() {
 
         const frameContext1 = await app.onReady();
         setFrameContext(frameContext1);
+        // 👇 Set Share URL if running in a space (not meeting)
+        if (frameContext1.type === "space") {
+          await app.setShareUrl(window.location.href);
+          console.log("✅ Share URL set for space tab");
+        }
         //setStatus((s) => s + " | onReady done");
 
         const userInfo = await app.user?.getUser(); // No need for `app.user.getUser()` — just `app.getUser()`!
@@ -184,6 +189,7 @@ function App() {
   return (
     <div className="container">
       <h2>Workmate Assistant</h2>
+      <h3>Frame context : {frameContext?.type}</h3>
       {user && (
         <p className="user-info">
           👋 Hello, <strong>{user.displayName}</strong>
