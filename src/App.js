@@ -202,10 +202,9 @@ function App() {
       <button onClick={() => {
         setShareUrlTest(' Onclick before setting share url')
         if (webexApp) {
-          setShareUrlTest(' setting share url :'+ window.location.href);
-          webexApp.setShareUrl(window.location.href);
+          setShareUrlTest(' setting share url  :' + webexApp.setShareUrl('https://webex-embedded-app.vercel.app'));
+          webexApp.setShareUrl('https://webex-embedded-app.vercel.app');
         }
-        
       }}>Add to a tab</button>
       <h2>Workmate Assistant</h2>
       {user && (
