@@ -43,7 +43,7 @@ function App() {
         app.onReady().then(() => {
           setShareUrlTest('OnReady')
           setWebexApp(app);
-          console.log("Webex App Ready", webexApp);
+          console.log("Webex App Ready", app);
         }).catch(error => {
           console.error("Error initializing Webex App", error);
         });
@@ -202,10 +202,13 @@ function App() {
       <button onClick={() => {
         setShareUrlTest(' Onclick before setting share url')
         if (webexApp) {
-          setShareUrlTest(' setting share url  :' + webexApp.setShareUrl('https://webex-embedded-app.vercel.app'));
-          webexApp.setShareUrl('https://webex-embedded-app.vercel.app');
+          setShareUrlTest(' setting share url  :');
+          webexApp.setShareUrl('https://webex-embedded-app.vercel.app', 'https://webex-embedded-app.vercel.app', 'MyEmbeddedApp').then((re) => {
+            setShareUrlTest(' the setShare url is set successfully ');
+          }).catch(err => setShareUrlTest('Got error :'+err));
         }
       }}>Add to a tab</button>
+
       <h2>Workmate Assistant</h2>
       {user && (
         <p className="user-info">
